@@ -47,20 +47,45 @@ connection.connect(function(err){
 		              
 	            var prod = data.id;
 	            console.log(prod);
-	            var amount = data.quantity;
+	            var amount = parseInt(data.quantity);
+	            
 
 	            connection.query('SELECT * from products WHERE id = ?', [prod], function (error, results, fields) {
+				  var quantity = results[0].stock_quantity;
+				  var price = results[0].price;
+				  var prod_id = parseInt(results[0].product_id);
+
 				  if (error) throw error;
 				  // stuff from database
 				  console.log(results);
-				  console.log(results[0].stock_quantity);
+				  console.log(quantity);
 
 				  if(amount < results[0].stock_quantity){
-				  	console.log('You CAN buy')
+				  	console.log('You CAN buy');
 
 				  	// here you would caculate new quantity
+				  	quantity = quantity - amount;
+				  	console.log(quantity);
+				  	var total = price * amount;
+				  	console.log("Your total is: $" + total);
+
+				  	//sql.query("UPDATE products SET stock_quantity=" + math + " WHERE id=" + bought.ID);
 				  	// update product with new quantity
+				  	//connection.query("UPDATE products SET stock_quantity=" + quantity + "WHERE id=" + prod);
+				  	
+				  	connection.query('UPDATE products SET stock_quantity = ? WHERE id = ?', [quantity, prod], function(error){
+				  		if(error) throw error;
+				  		console.log("There are " + quantity + " left");
+				  	});
+
 				  	// insert sale into sales database
+				  	//procuct_id, quantity, timestamp
+				  	connection.query('INSERT INTO sales(product_id, quantity_purchased) VALUES(??)', [prod_id, amount], function(error){
+                          if(error) throw error;
+                          console.log("Have a great day!");
+                      });
+
+
 
 				  } else {
 				  	console.log('Not enough stock')
